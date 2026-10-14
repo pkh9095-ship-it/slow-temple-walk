@@ -7,269 +7,256 @@
 <meta name="description" content="부모님·아이와 함께 가기 좋은 사찰을 걷기 편한 정도, 가는 길·주차, 추천 코스·소요 시간으로 정리했어요.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
+  /* 색: 절에서 가져온 다섯 가지 */
   :root{
-    --paper:#f7f0e4; --paper-2:#efe4d2; --card:#fffaf2;
-    --ink:#3a2e26; --ink-soft:#6b5a4c; --line:#e0d2bc;
-    --red:#9a3f2c; --red-dark:#7c3022; --pine:#4f6340; --gold:#c08a3e;
+    --stone:#eceee6;      /* 돌담 회백 — 바탕 */
+    --stone-2:#e0e4d9;    /* 그늘진 돌 */
+    --ink:#24302c;        /* 먹 — 글자 */
+    --ink-soft:#56635d;
+    --noerok:#3f6b5e;     /* 단청 뇌록 — 대표색 */
+    --noerok-dark:#2f5348;
+    --pillar:#8c3b2c;     /* 기둥 석간주 — 그림에만 */
+    --path:#d9a62e;       /* 길 표시 노랑 */
+    --line:#cfd5c8;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Gowun Dodum",system-ui,sans-serif;font-size:17px;line-height:1.75;word-break:keep-all}
-  h1,h2,h3{font-family:"Gowun Batang",serif;line-height:1.35;margin:0}
-  a{color:inherit}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
   [hidden]{display:none!important}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+  body{margin:0;background:var(--stone);color:var(--ink);font-family:"Gowun Dodum",system-ui,sans-serif;font-size:18px;line-height:1.8;word-break:keep-all}
+  h1,h2,h3{font-family:"Song Myung",serif;font-weight:400;line-height:1.3;margin:0;letter-spacing:-.01em}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--path);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  .btn{display:inline-block;background:var(--noerok);color:#fff;text-decoration:none;border:0;border-radius:10px;padding:16px 28px;font:inherit;font-size:18px;cursor:pointer}
+  .btn:hover{background:var(--noerok-dark)}
 
   /* 머리 */
-  header{position:sticky;top:0;z-index:10;background:rgba(247,240,228,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
-  .logo{font-family:"Gowun Batang",serif;font-weight:700;font-size:19px;text-decoration:none;display:flex;align-items:center;gap:8px}
-  .logo svg{width:26px;height:26px}
-  .btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;border:0;border-radius:999px;padding:14px 26px;font:inherit;font-size:17px;cursor:pointer;transition:background .2s}
-  .btn:hover{background:var(--red-dark)}
-  .btn.sm{padding:8px 16px;font-size:15px}
+  header{border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-family:"Song Myung",serif;font-size:22px;text-decoration:none}
+  .head-link{font-size:16px;color:var(--noerok);text-decoration:none;border-bottom:1px solid currentColor}
 
-  /* 첫 화면 */
-  .hero{padding:56px 0 64px}
-  .hero .wrap{display:grid;gap:40px;align-items:center}
-  @media(min-width:860px){.hero .wrap{grid-template-columns:1.05fr 1fr}}
-  .eyebrow{color:var(--pine);font-size:15px;letter-spacing:.04em;margin-bottom:14px}
-  .hero h1{font-size:clamp(30px,5.2vw,46px);color:var(--ink)}
-  .hero h1 em{font-style:normal;color:var(--red)}
-  .hero p.lead{color:var(--ink-soft);font-size:18px;margin:20px 0 30px;max-width:30em}
-  .photo-slot{position:relative;aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#f3e6cf 0%,#e9d6b6 60%,#d9c29c 100%);box-shadow:0 18px 40px -22px rgba(90,60,30,.45)}
-  .photo-slot svg{position:absolute;inset:0;width:100%;height:100%}
-  .photo-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .photo-slot .tag{position:absolute;left:14px;bottom:14px;background:rgba(255,250,242,.9);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--ink-soft)}
+  /* 첫 화면: 문장 + 절 가는 길 */
+  .hero{padding:64px 0 72px}
+  .hero .wrap{display:grid;gap:48px}
+  @media(min-width:900px){.hero .wrap{grid-template-columns:1fr 420px;align-items:center}}
+  .hero h1{font-size:clamp(36px,6vw,62px)}
+  .hero .lead{color:var(--ink-soft);margin:24px 0 34px;max-width:28em}
 
-  section{padding:64px 0}
-  .sec-head{margin-bottom:30px}
-  .sec-head h2{font-size:clamp(24px,3.6vw,32px)}
-  .sec-head p{color:var(--ink-soft);margin:8px 0 0}
-  .alt{background:var(--paper-2)}
+  .route{position:relative;background:#f6f7f2;border:1px solid var(--line);border-radius:22px;padding:28px 26px 26px}
+  .route h2{font-size:22px;margin-bottom:6px}
+  .route .sub{font-size:15px;color:var(--ink-soft);margin:0 0 18px}
+  .route ol{list-style:none;margin:0;padding:0;position:relative}
+  .route li:not(:last-child)::before{content:"";position:absolute;left:15px;top:30px;bottom:-14px;border-left:4px dotted var(--path)}
+  .route li{position:relative;display:grid;grid-template-columns:34px 1fr;gap:14px;padding:10px 0}
+  .route .dot{width:34px;height:34px;border-radius:50%;background:var(--stone);border:3px solid var(--path);display:grid;place-items:center;position:relative;z-index:1}
+  .route li:last-child .dot{background:var(--pillar);border-color:var(--pillar)}
+  .route .dot svg{width:16px;height:16px}
+  .route b{display:block;font-family:"Song Myung",serif;font-weight:400;font-size:20px;line-height:1.3}
+  .route .q{font-size:16px;color:var(--ink-soft)}
 
-  /* 세 가지 */
-  .three{display:grid;gap:16px}
-  @media(min-width:760px){.three{grid-template-columns:repeat(3,1fr)}}
-  .point{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
-  .point .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#f1e2cc;color:var(--red);margin-bottom:12px}
-  .point h3{font-size:20px;margin-bottom:6px}
-  .point p{margin:0;color:var(--ink-soft);font-size:16px}
+  section{padding:76px 0}
+  .shade{background:var(--stone-2)}
+  .sec-head{max-width:34em;margin-bottom:36px}
+  .sec-head h2{font-size:clamp(28px,4vw,40px)}
+  .sec-head p{color:var(--ink-soft);margin:10px 0 0}
 
-  /* 사찰 카드 */
-  .temples{display:grid;gap:20px}
-  @media(min-width:860px){.temples{grid-template-columns:repeat(3,1fr)}}
-  .temple{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-  .temple .photo-slot{border-radius:0;box-shadow:none;aspect-ratio:16/10}
-  .temple .body{padding:20px 22px 24px}
-  .temple h3{font-size:21px}
-  .temple .where{color:var(--ink-soft);font-size:15px;margin:2px 0 14px}
-  .temple dl{margin:0;display:grid;gap:10px}
-  .temple dt{font-size:14px;color:var(--pine);font-weight:700}
-  .temple dd{margin:0;font-size:16px}
-  .pending{color:#a8957f}
+  /* 사진 자리 */
+  .photo{position:relative;background:#d6dccf;border-radius:14px;overflow:hidden}
+  .photo svg,.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .photo .tag{position:absolute;left:12px;bottom:12px;background:rgba(246,247,242,.92);border-radius:6px;padding:2px 10px;font-size:14px;color:var(--ink-soft)}
+
+  /* 사찰: 사진 + 세 가지 정보가 한 줄 */
+  .temple{display:grid;gap:20px;padding:30px 0;border-top:1px solid var(--line)}
+  .temple:last-child{border-bottom:1px solid var(--line)}
+  @media(min-width:800px){.temple{grid-template-columns:320px 1fr;gap:40px;align-items:start}}
+  .temple .photo{aspect-ratio:4/3}
+  .temple h3{font-size:28px}
+  .temple .where{color:var(--ink-soft);margin:2px 0 18px;font-size:16px}
+  .facts{display:grid;gap:14px;margin:0}
+  @media(min-width:640px){.facts{grid-template-columns:repeat(3,1fr)}}
+  .facts div{background:#f6f7f2;border-radius:12px;padding:14px 16px}
+  .facts dt{font-size:15px;color:var(--noerok)}
+  .facts dd{margin:4px 0 0}
+  .pending{color:#8f9a92}
 
   /* 기록 */
   .gallery{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
-  @media(min-width:760px){.gallery{grid-template-columns:repeat(4,1fr)}}
-  .gallery .photo-slot{aspect-ratio:1/1;border-radius:14px;box-shadow:none}
+  @media(min-width:800px){.gallery{grid-template-columns:2fr 1fr 1fr;grid-template-rows:200px 200px}.gallery .photo:first-child{grid-row:span 2}}
+  .gallery .photo{min-height:150px}
   .links{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px}
-  .ghost{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 18px;font-size:15px;text-decoration:none;color:var(--ink-soft)}
+  .links span{border:1px solid var(--line);border-radius:8px;padding:8px 16px;font-size:16px;color:var(--ink-soft)}
 
-  /* 후기 */
-  .review-empty{background:var(--card);border:1px dashed #cdb894;border-radius:18px;padding:34px 24px;text-align:center;color:var(--ink-soft)}
+  /* 후기 자리 */
+  .reviews p{margin:0;color:var(--ink-soft);padding:24px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 
   /* 문의 */
-  .ask{background:var(--pine);color:#fbf6ec}
-  .ask .wrap{display:grid;gap:36px}
-  @media(min-width:860px){.ask .wrap{grid-template-columns:1fr 1.1fr;align-items:start}}
-  .ask h2{font-size:clamp(26px,4vw,34px)}
-  .ask .side p{opacity:.9}
-  .ask .side ul{padding-left:20px;opacity:.9}
-  form{background:var(--card);color:var(--ink);border-radius:20px;padding:26px}
-  label{display:block;font-size:15px;font-weight:700;margin:0 0 6px}
-  .field{margin-bottom:18px}
-  input[type=text],input[type=tel],textarea{width:100%;font:inherit;font-size:17px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
-  input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:transparent}
-  textarea{min-height:96px;resize:vertical}
-  .hint{font-size:14px;color:var(--ink-soft);margin-top:4px}
-  .consent{display:flex;gap:10px;align-items:flex-start;font-size:15px;background:#f6ecdc;border-radius:12px;padding:12px 14px;margin-bottom:18px}
-  .consent input{width:20px;height:20px;margin-top:4px;flex:none;accent-color:var(--red)}
+  .ask{background:var(--noerok-dark);color:#f1f3ec}
+  .ask .wrap{display:grid;gap:40px}
+  @media(min-width:900px){.ask .wrap{grid-template-columns:1fr 1.1fr;align-items:start}}
+  .ask h2{font-size:clamp(30px,4.4vw,44px)}
+  .ask .side p{opacity:.92;margin:18px 0 0;max-width:24em}
+  form{background:#f6f7f2;color:var(--ink);border-radius:18px;padding:28px}
+  label{display:block;font-size:16px;margin:0 0 6px}
+  .field{margin-bottom:20px}
+  input[type=text],textarea{width:100%;font:inherit;font-size:18px;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  input[type=text]:focus,textarea:focus{outline:3px solid var(--path);outline-offset:0;border-color:transparent}
+  textarea{min-height:100px;resize:vertical}
+  .hint{font-size:15px;color:var(--ink-soft);margin-top:4px}
+  .consent{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.65;background:var(--stone);border-radius:10px;padding:14px;margin-bottom:20px;cursor:pointer}
+  .consent input{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--noerok)}
   .trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   form .btn{width:100%}
-  .msg{margin-top:14px;font-size:16px;border-radius:12px;padding:12px 14px}
-  .msg.ok{background:#e8efdf;color:#33452a}
-  .msg.err{background:#f7e1db;color:var(--red-dark)}
+  .msg{margin-top:14px;border-radius:10px;padding:12px 14px}
+  .msg.ok{background:#dfeadf;color:#244233}
+  .msg.err{background:#f3dfd9;color:var(--pillar)}
 
-  footer{padding:36px 0 48px;color:var(--ink-soft);font-size:14px;text-align:center}
+  footer{padding:36px 0 48px;color:var(--ink-soft);font-size:15px}
 </style>
 </head>
 <body>
 
-<!-- 사진 넣는 법: images 폴더에 사진을 넣고, 아래 각 .photo-slot 안의 <svg>를 <img src="images/파일이름.jpg" alt="사진 설명"> 으로 바꾸면 된다. -->
+<!-- 사진 넣는 법: images 폴더에 사진을 넣고, 각 .photo 안의 <svg>를 <img src="images/파일이름.jpg" alt="사진 설명"> 으로 바꾼다. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="temple-art" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
-      <path d="M0 190 Q80 120 160 165 T300 140 T400 160 V300 H0Z" fill="#cdb48a" opacity=".55"/>
-      <path d="M0 215 Q100 170 200 205 T400 190 V300 H0Z" fill="#a9935f" opacity=".55"/>
-      <g transform="translate(200 205)">
-        <path d="M-92 -38 Q-60 -52 0 -56 Q60 -52 92 -38 Q72 -40 60 -36 L-60 -36 Q-72 -40 -92 -38Z" fill="#5b3a2a"/>
-        <rect x="-54" y="-36" width="108" height="8" fill="#9a3f2c"/>
-        <rect x="-50" y="-28" width="100" height="40" fill="#efe1c6"/>
-        <rect x="-50" y="-28" width="6" height="40" fill="#7c3022"/><rect x="44" y="-28" width="6" height="40" fill="#7c3022"/>
-        <rect x="-16" y="-28" width="5" height="40" fill="#7c3022"/><rect x="11" y="-28" width="5" height="40" fill="#7c3022"/>
-        <rect x="-60" y="12" width="120" height="8" fill="#b9a586"/>
+      <rect width="400" height="300" fill="#dfe4d8"/>
+      <path d="M0 175 Q90 110 180 150 T330 125 T400 140 V300 H0Z" fill="#b9c5b0"/>
+      <path d="M0 210 Q110 165 210 198 T400 182 V300 H0Z" fill="#8fa38c"/>
+      <g transform="translate(205 200)">
+        <path d="M-96 -40 Q-62 -55 0 -59 Q62 -55 96 -40 Q76 -42 62 -38 L-62 -38 Q-76 -42 -96 -40Z" fill="#24302c"/>
+        <rect x="-56" y="-38" width="112" height="7" fill="#3f6b5e"/>
+        <rect x="-52" y="-31" width="104" height="42" fill="#f2efe6"/>
+        <rect x="-52" y="-31" width="6" height="42" fill="#8c3b2c"/><rect x="46" y="-31" width="6" height="42" fill="#8c3b2c"/>
+        <rect x="-17" y="-31" width="5" height="42" fill="#8c3b2c"/><rect x="12" y="-31" width="5" height="42" fill="#8c3b2c"/>
+        <rect x="-64" y="11" width="128" height="8" fill="#a6ad9e"/>
       </g>
-      <circle cx="318" cy="70" r="22" fill="#f6e3b8"/>
-      <path d="M40 215 l14 -40 l14 40Z M58 215 l12 -32 l12 32Z" fill="#4f6340" opacity=".8"/>
-      <path d="M322 210 l14 -44 l14 44Z M342 210 l11 -30 l11 30Z" fill="#4f6340" opacity=".8"/>
+      <path d="M205 219 Q190 250 215 300" stroke="#d9a62e" stroke-width="4" stroke-dasharray="2 8" stroke-linecap="round" fill="none"/>
+      <path d="M44 212 l15 -44 l15 44Z M64 212 l12 -34 l12 34Z" fill="#3f6b5e"/>
+      <path d="M326 206 l15 -46 l15 46Z M346 206 l11 -32 l11 32Z" fill="#3f6b5e"/>
     </symbol>
   </defs>
 </svg>
 
 <header>
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="천천히 절 한 바퀴 처음으로">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 15 Q9 11 16 10.5 Q23 11 29 15 Q25 14.5 23 15.5 H9 Q7 14.5 3 15Z" fill="#5b3a2a"/><rect x="8" y="15.5" width="16" height="3" fill="#9a3f2c"/><rect x="9" y="18.5" width="14" height="8" fill="#e6d3b1"/><rect x="14.5" y="19" width="3" height="7.5" fill="#7c3022"/></svg>
-      천천히 절 한 바퀴
-    </a>
-    <a class="btn sm" href="#ask">맞춤 코스 물어보기</a>
+    <a class="logo" href="#top">천천히 절 한 바퀴</a>
+    <a class="head-link" href="#ask">맞춤 코스 물어보기</a>
   </div>
 </header>
 
 <main id="top">
-  <!-- 첫 화면 -->
   <section class="hero">
     <div class="wrap">
       <div>
-        <div class="eyebrow">가족·부모님과 함께 가는 사찰여행</div>
-        <h1>부모님 손잡고,<br><em>천천히 걷기 좋은 절</em>을<br>골랐어요.</h1>
+        <h1>부모님 손잡고,<br>천천히 걷기 좋은 절을<br>골랐어요.</h1>
         <p class="lead">걷기 편한 정도, 가는 길과 주차, 추천 코스와 걸리는 시간을 한눈에 정리했어요. 직접 다녀와서 찍은 사진으로 보여 드려요.</p>
         <a class="btn" href="#ask">우리 가족 맞춤 코스 물어보기</a>
       </div>
-      <div class="photo-slot">
-        <svg aria-hidden="true"><use href="#temple-art"/></svg>
-        <span class="tag">직접 찍은 사찰 사진이 들어갈 자리</span>
-      </div>
-    </div>
-  </section>
 
-  <!-- 세 가지 -->
-  <section class="alt">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>가족이 가장 궁금해하는 세 가지</h2>
-        <p>절마다 이 세 가지를 먼저 알려 드려요.</p>
-      </div>
-      <div class="three">
-        <div class="point">
-          <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 22l2-7 3 3v6M8 12l3-4 4 2 3 3M7 22l3-9"/></svg></div>
-          <h3>걷기 편한 정도</h3>
-          <p>계단과 경사가 얼마나 있는지, 주차장에서 법당까지 얼마나 걷는지.</p>
-        </div>
-        <div class="point">
-          <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <h3>가는 길·주차</h3>
-          <p>차로 가는 길, 대중교통, 주차할 수 있는 곳.</p>
-        </div>
-        <div class="point">
-          <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-          <h3>추천 코스·소요 시간</h3>
-          <p>반나절이면 될지, 하루가 필요할지. 쉬어 가기 좋은 곳까지.</p>
-        </div>
-      </div>
+      <!-- 절 가는 길: 주차장에서 대웅전까지, 가족이 묻는 질문 -->
+      <aside class="route" aria-label="절 가는 길에서 살펴보는 것">
+        <h2>절 가는 길, 이렇게 살펴봐요</h2>
+        <p class="sub">차에서 내려 법당에 닿기까지</p>
+        <ol>
+          <li><span class="dot"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="6" width="12" height="5" rx="1.5" fill="#24302c"/><circle cx="5" cy="12" r="1.6" fill="#24302c"/><circle cx="11" cy="12" r="1.6" fill="#24302c"/></svg></span>
+            <span><b>주차장</b><span class="q">어떻게 가고, 어디에 세우나요?</span></span></li>
+          <li><span class="dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5h12M4 5v9M12 5v9M3 3h10" stroke="#24302c" stroke-width="1.6" fill="none"/></svg></span>
+            <span><b>일주문</b><span class="q">계단과 오르막은 얼마나 되나요?</span></span></li>
+          <li><span class="dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 14V8l5-4 5 4v6" stroke="#24302c" stroke-width="1.6" fill="none"/></svg></span>
+            <span><b>천왕문</b><span class="q">부모님·아이가 걷기 편한가요?</span></span></li>
+          <li><span class="dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 7 Q8 3 15 7M4 7v7M12 7v7" stroke="#fff" stroke-width="1.6" fill="none"/></svg></span>
+            <span><b>대웅전</b><span class="q">다 둘러보는 데 얼마나 걸리나요?</span></span></li>
+        </ol>
+      </aside>
     </div>
   </section>
 
   <!-- 사찰 소개 (사찰 이름·정보는 사용자가 알려 주면 채운다 — 지어내지 않는다) -->
-  <section id="temples">
+  <section class="shade" id="temples">
     <div class="wrap">
       <div class="sec-head">
-        <h2>직접 다녀온 절 세 곳</h2>
-        <p>사진과 함께 하나씩 채워 가고 있어요.</p>
+        <h2>직접 다녀온 절</h2>
+        <p>절마다 걷기 편한 정도, 가는 길·주차, 추천 코스·소요 시간을 적어 둘게요. 지금 하나씩 채우고 있어요.</p>
       </div>
-      <div class="temples">
-        <article class="temple">
-          <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
-          <div class="body">
-            <h3>첫 번째 절</h3>
-            <div class="where pending">이름·지역 준비 중</div>
-            <dl>
-              <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
-            </dl>
-          </div>
-        </article>
-        <article class="temple">
-          <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
-          <div class="body">
-            <h3>두 번째 절</h3>
-            <div class="where pending">이름·지역 준비 중</div>
-            <dl>
-              <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
-            </dl>
-          </div>
-        </article>
-        <article class="temple">
-          <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
-          <div class="body">
-            <h3>세 번째 절</h3>
-            <div class="where pending">이름·지역 준비 중</div>
-            <dl>
-              <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
-              <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
-            </dl>
-          </div>
-        </article>
-      </div>
+
+      <article class="temple">
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
+        <div>
+          <h3>첫 번째 절</h3>
+          <div class="where pending">이름과 지역을 준비하고 있어요</div>
+          <dl class="facts">
+            <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
+          </dl>
+        </div>
+      </article>
+      <article class="temple">
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
+        <div>
+          <h3>두 번째 절</h3>
+          <div class="where pending">이름과 지역을 준비하고 있어요</div>
+          <dl class="facts">
+            <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
+          </dl>
+        </div>
+      </article>
+      <article class="temple">
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg><span class="tag">사진 준비 중</span></div>
+        <div>
+          <h3>세 번째 절</h3>
+          <div class="where pending">이름과 지역을 준비하고 있어요</div>
+          <dl class="facts">
+            <div><dt>걷기 편한 정도</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>가는 길·주차</dt><dd class="pending">준비 중</dd></div>
+            <div><dt>추천 코스·소요 시간</dt><dd class="pending">준비 중</dd></div>
+          </dl>
+        </div>
+      </article>
     </div>
   </section>
 
   <!-- 다녀온 기록 -->
-  <section class="alt">
+  <section>
     <div class="wrap">
       <div class="sec-head">
-        <h2>직접 다녀온 기록</h2>
-        <p>찍어 온 사진과 블로그·SNS에 남긴 이야기예요.</p>
+        <h2>다녀오며 찍은 사진</h2>
+        <p>블로그와 SNS에도 여행 이야기를 남기고 있어요.</p>
       </div>
       <div class="gallery">
-        <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
-        <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
-        <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
-        <div class="photo-slot"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
+        <div class="photo"><svg aria-hidden="true"><use href="#temple-art"/></svg></div>
       </div>
       <div class="links">
-        <span class="ghost">블로그 링크 준비 중</span>
-        <span class="ghost">SNS 링크 준비 중</span>
+        <span>블로그 링크 준비 중</span>
+        <span>SNS 링크 준비 중</span>
       </div>
     </div>
   </section>
 
   <!-- 후기 자리 (실제 후기가 생기면 넣는다) -->
-  <section>
+  <section class="reviews shade">
     <div class="wrap">
       <div class="sec-head"><h2>다녀온 가족들의 이야기</h2></div>
-      <div class="review-empty">실제로 다녀오신 가족들의 이야기가 생기면 이곳에 소개할게요.</div>
+      <p>실제로 다녀오신 가족들의 이야기가 생기면 이곳에 소개할게요.</p>
     </div>
   </section>
 
-  <!-- 문의 -->
   <section class="ask" id="ask">
     <div class="wrap">
       <div class="side">
-        <h2>우리 가족에 맞는 코스,<br>편하게 물어보세요</h2>
-        <p>가고 싶은 지역과 날짜를 남겨 주시면, 함께 가는 가족에게 맞는 절과 코스를 골라 답해 드릴게요.</p>
-        <ul>
-          <li>부모님 걸음에 맞춘 코스</li>
-          <li>주차와 이동이 편한 곳</li>
-          <li>반나절·하루 일정에 맞춘 순서</li>
-        </ul>
+        <h2>우리 가족에게 맞는 코스,<br>물어보세요</h2>
+        <p>가고 싶은 지역과 날짜를 남겨 주세요. 함께 가는 가족에게 맞는 절과 코스를 골라 답해 드릴게요.</p>
       </div>
       <form id="inquiry" novalidate>
         <div class="field">
@@ -291,7 +278,7 @@
         </div>
         <label class="consent">
           <input id="f-consent" type="checkbox" required>
-          <span>(필수) 문의에 답하기 위해 이름·연락처·문의 내용을 받고, 답변이 끝난 뒤 1년 동안 보관한 다음 지워요. 이에 동의해요.</span>
+          <span>(필수) 문의에 답하기 위해 이름, 연락처, 문의 내용을 받아요. 답변을 마친 뒤 1년 동안 보관하고 지워요. 이에 동의해요.</span>
         </label>
         <button class="btn" type="submit" id="f-submit">우리 가족 맞춤 코스 물어보기</button>
         <div class="msg" id="f-msg" role="status" hidden></div>
@@ -301,13 +288,14 @@
 </main>
 
 <footer>
-  <div class="wrap">© 천천히 절 한 바퀴 · 가족과 함께 걷는 사찰여행</div>
+  <div class="wrap">천천히 절 한 바퀴 — 가족과 함께 걷는 사찰여행</div>
 </footer>
 
 <script>
   const form = document.getElementById('inquiry');
   const msg = document.getElementById('f-msg');
   const btn = document.getElementById('f-submit');
+  const LABEL = btn.textContent;
   const show = (text, ok) => { msg.textContent = text; msg.className = 'msg ' + (ok ? 'ok' : 'err'); msg.hidden = false; };
 
   form.addEventListener('submit', async (e) => {
@@ -328,9 +316,9 @@
       if (r.ok) { form.reset(); show('문의가 접수됐어요. 확인 후 연락드릴게요.', true); }
       else show(data.error || '보내지 못했어요. 잠시 뒤 다시 시도해 주세요.', false);
     } catch {
-      show('보내지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.', false);
+      show('보내지 못했어요. 인터넷 연결을 확인하고 다시 보내 주세요.', false);
     } finally {
-      btn.disabled = false; btn.textContent = '우리 가족 맞춤 코스 물어보기';
+      btn.disabled = false; btn.textContent = LABEL;
     }
   });
 </script>
