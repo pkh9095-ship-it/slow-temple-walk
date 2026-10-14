@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>문의함 — 천천히 절 한 바퀴</title>
+<style>
+  :root{--paper:#f7f0e4;--card:#fffaf2;--ink:#3a2e26;--soft:#6b5a4c;--line:#e0d2bc;--red:#9a3f2c;--pine:#4f6340}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;font-size:17px;line-height:1.6}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+  h1{font-size:20px;margin:6px 0 18px}
+  input{width:100%;font:inherit;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  button{font:inherit;font-size:16px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:12px 14px;min-height:46px;cursor:pointer}
+  .primary{background:var(--red);border-color:var(--red);color:#fff;width:100%;margin-top:12px}
+  .err{color:var(--red);margin-top:10px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .count{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin:6px 0 18px}
+  .count b{font-size:40px;color:var(--red);line-height:1}
+  .count span{color:var(--soft);margin-left:6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+  .card.new{border-left:5px solid var(--red)}
+  .meta{color:var(--soft);font-size:15px}
+  .name{font-weight:700;font-size:18px;margin:2px 0}
+  .contact{background:none;border:0;padding:0;min-height:auto;color:var(--pine);text-decoration:underline;font-size:17px}
+  .text{white-space:pre-wrap;margin:8px 0 12px}
+  .statuses{display:flex;gap:8px}
+  .statuses button{flex:1;padding:10px 6px}
+  .statuses button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .empty{color:var(--soft);text-align:center;padding:30px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="login">
+    <h1>천천히 절 한 바퀴 · 문의함</h1>
+    <form id="login-form">
+      <input id="pw" type="password" autocomplete="current-password" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호">
+      <button class="primary" type="submit">들어가기</button>
+      <div class="err" id="login-err" hidden></div>
+    </form>
+  </section>
+
+  <section id="board" hidden>
+    <div class="top">
+      <h1>문의함</h1>
+      <div><button id="reload">새로고침</button> <button id="logout">나가기</button></div>
+    </div>
+    <div class="count"><b id="new-count">0</b><span>건의 새 문의</span></div>
+    <div class="err" id="board-err" hidden></div>
+    <div id="list"></div>
+  </section>
+</div>
+
+<script>
+  const KEY = 'admin-pw';
+  const STATUSES = ['새 문의', '연락함', '완료'];
+  const $ = (id) => document.getElementById(id);
+  const getPw = () => sessionStorage.getItem(KEY) || '';
+
+  async function api(method, body) {
+    const r = await fetch('/api/admin', {
+      method,
+      headers: { 'x-admin-password': getPw(), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, data };
+  }
+
+  function toLogin(message) {
+    sessionStorage.removeItem(KEY);
+    $('board').hidden = true; $('login').hidden = false;
+    $('login-err').textContent = message || ''; $('login-err').hidden = !message;
+    $('pw').value = ''; $('pw').focus();
+  }
+
+  const fmt = (s) => new Date(s).toLocaleString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' });
+
+  function render(rows) {
+    $('new-count').textContent = rows.filter((r) => r.status === '새 문의').length;
+    const list = $('list'); list.innerHTML = '';
+    if (!rows.length) { list.innerHTML = '<div class="empty">아직 들어온 문의가 없어요.</div>'; return; }
+    for (const row of rows) {
+      const card = document.createElement('div');
+      card.className = 'card' + (row.status === '새 문의' ? ' new' : '');
+      const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = fmt(row.created_at);
+      const name = document.createElement('div'); name.className = 'name'; name.textContent = row.name;
+      const contact = document.createElement('button'); contact.className = 'contact'; contact.textContent = row.contact;
+      contact.title = '눌러서 복사';
+      contact.onclick = async () => {
+        try { await navigator.clipboard.writeText(row.contact); contact.textContent = row.contact + ' (복사됨)'; setTimeout(() => contact.textContent = row.contact, 1500); }
+        catch { const sel = getSelection(); const rg = document.createRange(); rg.selectNodeContents(contact); sel.removeAllRanges(); sel.addRange(rg); }
+      };
+      const text = document.createElement('div'); text.className = 'text';
+      text.textContent = row.message ? '가고 싶은 지역·날짜: ' + row.message : '(지역·날짜 안 적음)';
+      const st = document.createElement('div'); st.className = 'statuses';
+      for (const s of STATUSES) {
+        const b = document.createElement('button'); b.textContent = s;
+        if (row.status === s) b.className = 'on';
+        b.onclick = async () => {
+          if (row.status === s) return;
+          const r = await api('PATCH', { id: row.id, status: s });
+          if (r.status === 401) return toLogin('비밀번호가 맞지 않아요.');
+          if (!r.ok) return showErr(r.data.error || '바꾸지 못했어요.');
+          load();
+        };
+        st.appendChild(b);
+      }
+      card.append(meta, name, contact, text, st);
+      list.appendChild(card);
+    }
+  }
+
+  function showErr(m) { $('board-err').textContent = m; $('board-err').hidden = !m; }
+
+  async function load() {
+    showErr('');
+    const r = await api('GET');
+    if (r.status === 401) return toLogin('비밀번호가 맞지 않아요.');
+    if (!r.ok) { $('login').hidden = true; $('board').hidden = false; return showErr(r.data.error || '불러오지 못했어요.'); }
+    $('login').hidden = true; $('board').hidden = false;
+    render(r.data.rows || []);
+  }
+
+  $('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = $('pw').value; if (!v) return;
+    sessionStorage.setItem(KEY, v);
+    load();
+  });
+  $('reload').onclick = load;
+  $('logout').onclick = () => toLogin('');
+  if (getPw()) load(); else $('pw').focus();
+</script>
+</body>
+</html>
