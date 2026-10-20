@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11월 원데이 클래스 모션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=block" rel="stylesheet">
+<style>
+  :root { --bg: #1b1714; --ink: #f4e9d8; --btn: #c8553d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+  canvas { height: min(82vh, calc((100vw - 32px) * 16 / 9)); aspect-ratio: 9 / 16;
+    border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  button { font: 600 15px system-ui, sans-serif; padding: 10px 18px; border-radius: 999px; border: 0;
+    background: var(--btn); color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--ink); border: 1px solid #5a4d44; }
+  button:disabled { opacity: .5; cursor: default; }
+  #msg { font-size: 13px; opacity: .7; min-height: 1em; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div class="bar">
+  <button class="ghost" id="replay">다시 재생</button>
+  <button id="save">영상으로 저장 (5초)</button>
+</div>
+<div id="msg"></div>
+
+<script>
+const W = 1080, H = 1920, DURATION = 5;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+// 색상: 11월 늦가을 느낌
+const C = {
+  bg1: '#f6ead7', bg2: '#efd9bd',
+  main: '#c8553d', dark: '#3b2a22', accent: '#f2a541', shadow: '#2a1d17'
+};
+
+// 줄별 글자 배치
+const LINES = [
+  { text: '11월',   size: 380, y: 720,  color: C.main },
+  { text: '원데이', size: 250, y: 1080, color: C.dark },
+  { text: '클래스', size: 250, y: 1360, color: C.dark },
+];
+const FONT = '"Black Han Sans", sans-serif';
+const START = 0.35, STEP = 0.2, POP = 0.65;
+
+let chars = [];
+function layout() {
+  chars = [];
+  let i = 0;
+  for (const line of LINES) {
+    ctx.font = `${line.size}px ${FONT}`;
+    const gap = line.size * 0.04;
+    const ws = [...line.text].map(ch => ctx.measureText(ch).width);
+    const total = ws.reduce((a, b) => a + b, 0) + gap * (ws.length - 1);
+    let x = (W - total) / 2;
+    [...line.text].forEach((ch, k) => {
+      chars.push({ ch, x: x + ws[k] / 2, y: line.y, size: line.size, color: line.color,
+        t0: START + i * STEP, rot: (i % 2 ? 1 : -1) * (10 + (i * 7) % 9), idx: i });
+      x += ws[k] + gap;
+      i++;
+    });
+  }
+}
+
+// 이징
+const clamp = v => Math.max(0, Math.min(1, v));
+const easeOutBack = t => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+// 튀어나올 때 터지는 점들 (고정 시드로 매번 같게)
+function rand(seed) { const x = Math.sin(seed * 999.13) * 43758.5453; return x - Math.floor(x); }
+
+function drawBackground(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, C.bg1); g.addColorStop(1, C.bg2);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // 천천히 도는 큰 원 장식
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = C.accent;
+  ctx.beginPath(); ctx.arc(W * 0.85 + Math.sin(t) * 20, 260, 260, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = C.main;
+  ctx.beginPath(); ctx.arc(W * 0.1, H - 240 + Math.cos(t * 0.8) * 20, 320, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // 떨어지는 작은 낙엽 점
+  for (let k = 0; k < 18; k++) {
+    const sx = rand(k + 1) * W;
+    const speed = 120 + rand(k + 50) * 160;
+    const y = ((rand(k + 100) * H + t * speed) % (H + 80)) - 40;
+    const x = sx + Math.sin(t * 1.5 + k) * 30;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(t * 2 + k);
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = k % 3 === 0 ? C.main : C.accent;
+    ctx.beginPath(); ctx.ellipse(0, 0, 14, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawBurst(c, t) {
+  const p = (t - c.t0 - 0.12) / 0.55;
+  if (p <= 0 || p >= 1) return;
+  const e = easeOutCubic(p);
+  for (let k = 0; k < 10; k++) {
+    const a = (k / 10) * Math.PI * 2 + c.idx;
+    const r = c.size * (0.45 + 0.4 * e);
+    ctx.save();
+    ctx.globalAlpha = 1 - p;
+    ctx.fillStyle = k % 2 ? C.accent : C.main;
+    ctx.beginPath();
+    ctx.arc(c.x + Math.cos(a) * r, c.y - c.size * 0.35 + Math.sin(a) * r, 10 * (1 - p) + 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawChar(c, t) {
+  const p = clamp((t - c.t0) / POP);
+  if (p <= 0) return;
+  const s = easeOutBack(p);
+  const settle = t - c.t0 - POP;
+  const bob = settle > 0 ? Math.sin(settle * 3 + c.idx * 0.7) * 8 * clamp(settle * 2) : 0;
+  const yOff = (1 - easeOutCubic(p)) * 140 + bob;
+  const rot = (1 - easeOutCubic(p)) * c.rot * Math.PI / 180;
+
+  ctx.save();
+  ctx.translate(c.x, c.y + yOff);
+  ctx.rotate(rot);
+  ctx.scale(s, s);
+  ctx.font = `${c.size}px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.globalAlpha = clamp(p * 4);
+  // 딱 떨어지는 그림자로 '튀어나온' 느낌
+  const off = c.size * 0.045;
+  ctx.fillStyle = C.shadow;
+  ctx.fillText(c.ch, off, off);
+  ctx.fillStyle = c.color;
+  ctx.fillText(c.ch, 0, 0);
+  ctx.restore();
+}
+
+function drawUnderline(t) {
+  const t0 = START + chars.length * STEP + 0.25;
+  const p = easeOutCubic(clamp((t - t0) / 0.5));
+  if (p <= 0) return;
+  const w = 640 * p;
+  ctx.save();
+  ctx.fillStyle = C.accent;
+  ctx.beginPath();
+  ctx.roundRect((W - 640) / 2, 1450, w, 26, 13);
+  ctx.fill();
+  ctx.restore();
+}
+
+function render(t) {
+  drawBackground(t);
+  drawUnderline(t);
+  for (const c of chars) drawBurst(c, t);
+  for (const c of chars) drawChar(c, t);
+}
+
+let startAt = 0, raf = 0, onDone = null;
+function play(cb) {
+  cancelAnimationFrame(raf);
+  onDone = cb || null;
+  startAt = performance.now();
+  const tick = now => {
+    const t = (now - startAt) / 1000;
+    render(Math.min(t, DURATION));
+    if (t < DURATION) raf = requestAnimationFrame(tick);
+    else if (onDone) { const f = onDone; onDone = null; f(); }
+  };
+  raf = requestAnimationFrame(tick);
+}
+
+const msg = document.getElementById('msg');
+const saveBtn = document.getElementById('save');
+document.getElementById('replay').onclick = () => play();
+
+saveBtn.onclick = () => {
+  if (!window.MediaRecorder || !cv.captureStream) { msg.textContent = '이 브라우저는 영상 저장을 지원하지 않아요. 크롬에서 열어주세요.'; return; }
+  const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
+  const type = types.find(x => MediaRecorder.isTypeSupported(x));
+  const stream = cv.captureStream(30);
+  const rec = new MediaRecorder(stream, { mimeType: type, videoBitsPerSecond: 12_000_000 });
+  const parts = [];
+  rec.ondataavailable = e => e.data.size && parts.push(e.data);
+  rec.onstop = () => {
+    const blob = new Blob(parts, { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '11월-원데이-클래스.' + (type.includes('mp4') ? 'mp4' : 'webm');
+    a.click();
+    saveBtn.disabled = false;
+    msg.textContent = '저장 완료!';
+  };
+  saveBtn.disabled = true;
+  msg.textContent = '녹화 중... (5초)';
+  rec.start();
+  play(() => setTimeout(() => rec.stop(), 150));
+};
+
+document.fonts.load(`250px ${FONT}`, '11월원데이클래스').then(() => { layout(); play(); });
+</script>
+</body>
+</html>
